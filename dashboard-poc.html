@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>APEX Analytics — Executive Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --surface3: #1e1e28;
+    --border: rgba(255,255,255,0.07);
+    --border-bright: rgba(255,255,255,0.13);
+    --text: #f0ede8;
+    --text-muted: #7a7a8a;
+    --text-dim: #4a4a5a;
+    --gold: #d4a94a;
+    --gold-light: #f0c96a;
+    --gold-dim: rgba(212,169,74,0.15);
+    --teal: #3ecfb0;
+    --teal-dim: rgba(62,207,176,0.12);
+    --rose: #e05a7a;
+    --rose-dim: rgba(224,90,122,0.12);
+    --violet: #9b7dea;
+    --violet-dim: rgba(155,125,234,0.12);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Instrument Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Ambient background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 10%, rgba(155,125,234,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 80% 80%, rgba(62,207,176,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 60% 30%, rgba(212,169,74,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper { position: relative; z-index: 1; }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 72px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 0;
+    gap: 8px;
+    z-index: 100;
+  }
+
+  .logo-mark {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: #0a0a0f;
+    margin-bottom: 16px;
+    box-shadow: 0 0 20px rgba(212,169,74,0.3);
+  }
+
+  .nav-item {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--text-dim);
+    font-size: 18px;
+  }
+
+  .nav-item:hover { background: var(--surface2); color: var(--text-muted); }
+  .nav-item.active { background: var(--gold-dim); color: var(--gold); }
+
+  .sidebar-spacer { flex: 1; }
+
+  /* MAIN LAYOUT */
+  .main {
+    margin-left: 72px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 36px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,15,0.8);
+    backdrop-filter: blur(20px);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .header-left h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: -0.3px;
+  }
+
+  .header-left p {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .date-chip {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 100px;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-export {
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: #0a0a0f;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(212,169,74,0.25);
+  }
+
+  .btn-export:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(212,169,74,0.35); }
+
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--violet), var(--teal));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+  }
+
+  /* CONTENT */
+  .content {
+    padding: 32px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  /* PERIOD FILTER */
+  .period-filter {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 4px;
+    width: fit-content;
+  }
+
+  .period-btn {
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    font-family: 'Instrument Sans', sans-serif;
+  }
+
+  .period-btn.active {
+    background: var(--surface3);
+    color: var(--text);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  /* KPI STRIP */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .kpi-card:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+  .kpi-card:hover::before { opacity: 1; }
+
+  .kpi-card.gold::before { background: radial-gradient(ellipse at top left, rgba(212,169,74,0.08), transparent 60%); }
+  .kpi-card.teal::before { background: radial-gradient(ellipse at top left, rgba(62,207,176,0.08), transparent 60%); }
+  .kpi-card.rose::before { background: radial-gradient(ellipse at top left, rgba(224,90,122,0.08), transparent 60%); }
+  .kpi-card.violet::before { background: radial-gradient(ellipse at top left, rgba(155,125,234,0.08), transparent 60%); }
+
+  .kpi-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .kpi-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .kpi-icon {
+    width: 34px; height: 34px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  .kpi-card.gold .kpi-icon { background: var(--gold-dim); }
+  .kpi-card.teal .kpi-icon { background: var(--teal-dim); }
+  .kpi-card.rose .kpi-icon { background: var(--rose-dim); }
+  .kpi-card.violet .kpi-icon { background: var(--violet-dim); }
+
+  .kpi-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    line-height: 1;
+    letter-spacing: -1px;
+    margin-bottom: 10px;
+  }
+
+  .kpi-card.gold .kpi-value { color: var(--gold-light); }
+  .kpi-card.teal .kpi-value { color: var(--teal); }
+  .kpi-card.rose .kpi-value { color: var(--rose); }
+  .kpi-card.violet .kpi-value { color: var(--violet); }
+
+  .kpi-delta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .delta-badge {
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .delta-up { background: rgba(62,207,176,0.15); color: var(--teal); }
+  .delta-down { background: rgba(224,90,122,0.15); color: var(--rose); }
+
+  .kpi-sub { color: var(--text-dim); font-size: 11px; }
+
+  /* Sparkline mini chart in KPI */
+  .kpi-sparkline {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 120px; height: 50px;
+    opacity: 0.4;
+  }
+
+  /* CHART ROW */
+  .chart-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+  }
+
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .chart-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .chart-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: -0.3px;
+  }
+
+  .chart-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .chart-legend {
+    display: flex;
+    gap: 16px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .chart-canvas-wrap {
+    height: 240px;
+    position: relative;
+  }
+
+  /* BOTTOM ROW */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  /* TABLE CARD */
+  .table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    grid-column: span 2;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+  }
+
+  thead th {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-dim);
+    font-weight: 500;
+    padding: 0 0 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-family: 'DM Mono', monospace;
+  }
+
+  thead th:not(:first-child) { text-align: right; }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover { background: var(--surface2); }
+  tbody tr:last-child { border-bottom: none; }
+
+  tbody td {
+    padding: 14px 0;
+    font-size: 13px;
+  }
+
+  tbody td:not(:first-child) {
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+
+  .product-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .product-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .bar-cell {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .mini-bar {
+    width: 60px;
+    height: 4px;
+    background: var(--surface3);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .mini-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: var(--gold);
+  }
+
+  .status-pill {
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+
+  .status-up { background: var(--teal-dim); color: var(--teal); }
+  .status-watch { background: rgba(212,169,74,0.15); color: var(--gold); }
+  .status-down { background: var(--rose-dim); color: var(--rose); }
+
+  /* GAUGE CARD */
+  .gauge-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .gauge-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .gauge-svg-wrap {
+    position: relative;
+    width: 160px;
+    height: 90px;
+    overflow: visible;
+  }
+
+  .gauge-center-text {
+    text-align: center;
+    margin-top: -8px;
+  }
+
+  .gauge-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--teal);
+    letter-spacing: -1px;
+  }
+
+  .gauge-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .gauge-targets {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 20px;
+    width: 100%;
+  }
+
+  .gauge-target {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    text-align: center;
+  }
+
+  .gauge-target-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .gauge-target-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 3px;
+  }
+
+  /* SCROLL ANIMATION */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .kpi-card { animation: fadeUp 0.5s ease forwards; }
+  .kpi-card:nth-child(1) { animation-delay: 0.05s; opacity: 0; }
+  .kpi-card:nth-child(2) { animation-delay: 0.1s; opacity: 0; }
+  .kpi-card:nth-child(3) { animation-delay: 0.15s; opacity: 0; }
+  .kpi-card:nth-child(4) { animation-delay: 0.2s; opacity: 0; }
+
+  .chart-card { animation: fadeUp 0.5s ease 0.25s forwards; opacity: 0; }
+  .table-card { animation: fadeUp 0.5s ease 0.3s forwards; opacity: 0; }
+  .gauge-card { animation: fadeUp 0.5s ease 0.35s forwards; opacity: 0; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+  /* TOOLTIP OVERRIDE */
+  .chartjs-tooltip { font-family: 'DM Mono', monospace !important; }
+
+  /* Ticker strip */
+  .ticker {
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    padding: 10px 36px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    overflow: hidden;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+  }
+
+  .ticker-label {
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .ticker-items {
+    display: flex;
+    gap: 32px;
+    animation: ticker-scroll 20s linear infinite;
+  }
+
+  @keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    color: var(--text-muted);
+  }
+
+  .ticker-name { color: var(--text); font-weight: 500; }
+  .ticker-val { }
+  .ticker-up { color: var(--teal); }
+  .ticker-dn { color: var(--rose); }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="logo-mark">A</div>
+    <div class="nav-item active" title="Dashboard">⬛</div>
+    <div class="nav-item" title="Reports">📊</div>
+    <div class="nav-item" title="Analytics">🔬</div>
+    <div class="nav-item" title="Data">🗂</div>
+    <div class="nav-item" title="Maps">🗺</div>
+    <div class="sidebar-spacer"></div>
+    <a href="index.html" class="nav-item" title="Home" style="text-decoration:none;background:rgba(62,207,176,0.15);color:var(--teal);font-size:13px;">&#8592;</a>
+    <div class="nav-item" title="Settings">⚙</div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-left">
+        <h1>Revenue Intelligence</h1>
+        <p>APEX ANALYTICS · EXECUTIVE OVERVIEW · FY 2024</p>
+      </div>
+      <div class="header-right">
+        <div class="period-filter">
+          <button class="period-btn">1W</button>
+          <button class="period-btn">1M</button>
+          <button class="period-btn active">1Q</button>
+          <button class="period-btn">1Y</button>
+          <button class="period-btn">ALL</button>
+        </div>
+        <div class="date-chip">Mar 11, 2026 · 14:32</div>
+        <button class="btn-export">↑ Export</button>
+        <div class="avatar">JD</div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- KPI STRIP -->
+      <div class="kpi-strip">
+        <div class="kpi-card gold">
+          <div class="kpi-top">
+            <span class="kpi-label">Total Revenue</span>
+            <div class="kpi-icon">💰</div>
+          </div>
+          <div class="kpi-value">$4.82M</div>
+          <div class="kpi-delta">
+            <span class="delta-badge delta-up">▲ 18.4%</span>
+            <span class="kpi-sub">vs last quarter</span>
+          </div>
+          <canvas class="kpi-sparkline" id="spark1"></canvas>
+        </div>
+        <div class="kpi-card teal">
+          <div class="kpi-top">
+            <span class="kpi-label">New Customers</span>
+            <div class="kpi-icon">👥</div>
+          </div>
+          <div class="kpi-value">2,847</div>
+          <div class="kpi-delta">
+            <span class="delta-badge delta-up">▲ 12.1%</span>
+            <span class="kpi-sub">vs last quarter</span>
+          </div>
+          <canvas class="kpi-sparkline" id="spark2"></canvas>
+        </div>
+        <div class="kpi-card rose">
+          <div class="kpi-top">
+            <span class="kpi-label">Churn Rate</span>
+            <div class="kpi-icon">⚠️</div>
+          </div>
+          <div class="kpi-value">3.2%</div>
+          <div class="kpi-delta">
+            <span class="delta-badge delta-up">▲ 0.4pp</span>
+            <span class="kpi-sub">needs attention</span>
+          </div>
+          <canvas class="kpi-sparkline" id="spark3"></canvas>
+        </div>
+        <div class="kpi-card violet">
+          <div class="kpi-top">
+            <span class="kpi-label">Avg Deal Size</span>
+            <div class="kpi-icon">📦</div>
+          </div>
+          <div class="kpi-value">$16.9K</div>
+          <div class="kpi-delta">
+            <span class="delta-badge delta-up">▲ 7.3%</span>
+            <span class="kpi-sub">vs last quarter</span>
+          </div>
+          <canvas class="kpi-sparkline" id="spark4"></canvas>
+        </div>
+      </div>
+
+      <!-- CHART ROW -->
+      <div class="chart-row">
+        <!-- Main Revenue Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Revenue & Pipeline Trend</div>
+              <div class="chart-subtitle">MONTHLY · Q1 2024 — Q1 2026</div>
+            </div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--gold)"></div>
+                Revenue
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--violet)"></div>
+                Pipeline
+              </div>
+              <div class="legend-item">
+                <div class="legend-dot" style="background:var(--teal)"></div>
+                Target
+              </div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="mainChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Donut Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">Revenue by Segment</div>
+              <div class="chart-subtitle">CURRENT QUARTER</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap" style="display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;">
+            <canvas id="donutChart" style="max-height:180px;max-width:180px;"></canvas>
+            <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+                <span style="display:flex;align-items:center;gap:6px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--gold);display:inline-block"></span>Enterprise</span>
+                <span style="font-family:'DM Mono',monospace;color:var(--gold-light)">48%</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+                <span style="display:flex;align-items:center;gap:6px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--teal);display:inline-block"></span>Mid-Market</span>
+                <span style="font-family:'DM Mono',monospace;color:var(--teal)">31%</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+                <span style="display:flex;align-items:center;gap:6px;color:var(--text-muted)"><span style="width:8px;height:8px;border-radius:2px;background:var(--violet);display:inline-block"></span>SMB</span>
+                <span style="font-family:'DM Mono',monospace;color:var(--violet)">21%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM ROW -->
+      <div class="bottom-row">
+
+        <!-- TABLE -->
+        <div class="table-card">
+          <div class="chart-header" style="margin-bottom:16px;">
+            <div>
+              <div class="chart-title">Top Products</div>
+              <div class="chart-subtitle">RANKED BY REVENUE · Q1 2026</div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);">5 of 24 shown</div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Revenue</th>
+                <th>Units</th>
+                <th>Share</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="product-name"><span class="product-dot" style="background:var(--gold)"></span>Apex Enterprise Suite</div></td>
+                <td>$1.84M</td>
+                <td>109</td>
+                <td>
+                  <div class="bar-cell">
+                    <div class="mini-bar"><div class="mini-bar-fill" style="width:90%;background:var(--gold)"></div></div>
+                    38%
+                  </div>
+                </td>
+                <td><span class="status-pill status-up">GROWING</span></td>
+              </tr>
+              <tr>
+                <td><div class="product-name"><span class="product-dot" style="background:var(--teal)"></span>Data Cloud Pro</div></td>
+                <td>$1.12M</td>
+                <td>284</td>
+                <td>
+                  <div class="bar-cell">
+                    <div class="mini-bar"><div class="mini-bar-fill" style="width:55%;background:var(--teal)"></div></div>
+                    23%
+                  </div>
+                </td>
+                <td><span class="status-pill status-up">GROWING</span></td>
+              </tr>
+              <tr>
+                <td><div class="product-name"><span class="product-dot" style="background:var(--violet)"></span>Analytics Starter</div></td>
+                <td>$790K</td>
+                <td>1,040</td>
+                <td>
+                  <div class="bar-cell">
+                    <div class="mini-bar"><div class="mini-bar-fill" style="width:38%;background:var(--violet)"></div></div>
+                    16%
+                  </div>
+                </td>
+                <td><span class="status-pill status-watch">STEADY</span></td>
+              </tr>
+              <tr>
+                <td><div class="product-name"><span class="product-dot" style="background:var(--rose)"></span>Legacy Connect</div></td>
+                <td>$510K</td>
+                <td>320</td>
+                <td>
+                  <div class="bar-cell">
+                    <div class="mini-bar"><div class="mini-bar-fill" style="width:25%;background:var(--rose)"></div></div>
+                    11%
+                  </div>
+                </td>
+                <td><span class="status-pill status-down">DECLINING</span></td>
+              </tr>
+              <tr>
+                <td><div class="product-name"><span class="product-dot" style="background:#5a9fd4)"></span>Workflow Automate</div></td>
+                <td>$560K</td>
+                <td>412</td>
+                <td>
+                  <div class="bar-cell">
+                    <div class="mini-bar"><div class="mini-bar-fill" style="width:27%;background:#5a9fd4"></div></div>
+                    12%
+                  </div>
+                </td>
+                <td><span class="status-pill status-up">GROWING</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- GAUGE CARD -->
+        <div class="gauge-card">
+          <div class="chart-title" style="margin-bottom:4px;">Quota Attainment</div>
+          <div class="chart-subtitle">Q1 2026 TARGET · $5.2M</div>
+
+          <div class="gauge-wrap">
+            <div style="position:relative;">
+              <svg width="200" height="110" viewBox="0 0 200 110">
+                <!-- Background arc -->
+                <path d="M 20 100 A 80 80 0 0 1 180 100"
+                  fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="14" stroke-linecap="round"/>
+                <!-- Teal arc (92.7% = ~167deg of 180) -->
+                <path d="M 20 100 A 80 80 0 0 1 180 100"
+                  fill="none" stroke="url(#gaugeGrad)" stroke-width="14" stroke-linecap="round"
+                  stroke-dasharray="251.3" stroke-dashoffset="18.4"
+                  style="transition:stroke-dashoffset 1.5s ease"/>
+                <!-- Tick marks -->
+                <line x1="20" y1="100" x2="28" y2="100" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                <line x1="180" y1="100" x2="172" y2="100" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                <line x1="100" y1="20" x2="100" y2="28" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+                <defs>
+                  <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#3ecfb0"/>
+                    <stop offset="100%" stop-color="#d4a94a"/>
+                  </linearGradient>
+                </defs>
+                <!-- Needle -->
+                <line x1="100" y1="100" x2="36" y2="26"
+                  stroke="var(--text)" stroke-width="2" stroke-linecap="round"
+                  style="transform-origin:100px 100px;transform:rotate(-3deg);"/>
+                <circle cx="100" cy="100" r="5" fill="var(--text-muted)"/>
+              </svg>
+            </div>
+            <div class="gauge-center-text">
+              <div class="gauge-value">92.7%</div>
+              <div class="gauge-label">of $5.2M target reached</div>
+            </div>
+          </div>
+
+          <div class="gauge-targets">
+            <div class="gauge-target">
+              <div class="gauge-target-val" style="color:var(--gold)">$4.82M</div>
+              <div class="gauge-target-label">Achieved</div>
+            </div>
+            <div class="gauge-target">
+              <div class="gauge-target-val" style="color:var(--rose)">$380K</div>
+              <div class="gauge-target-label">Gap</div>
+            </div>
+            <div class="gauge-target">
+              <div class="gauge-target-val" style="color:var(--teal)">21d</div>
+              <div class="gauge-target-label">Remaining</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /content -->
+
+    <!-- TICKER -->
+    <div class="ticker">
+      <span class="ticker-label">Live ·</span>
+      <div class="ticker-items" id="tickerItems">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div>
+
+<script>
+// Period filter
+document.querySelectorAll('.period-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// Chart.js global defaults
+Chart.defaults.color = '#7a7a8a';
+Chart.defaults.font.family = "'DM Mono', monospace";
+Chart.defaults.font.size = 11;
+
+// ──────────────────────────────────────────────
+// MAIN LINE CHART
+// ──────────────────────────────────────────────
+const months = ['Q1\'24','','','Q2\'24','','','Q3\'24','','','Q4\'24','','','Q1\'25','','','Q2\'25','','','Q3\'25','','','Q4\'25','','','Q1\'26'];
+const revenue  = [1.9,2.1,2.0,2.3,2.5,2.4,2.6,2.8,2.7,3.0,3.2,3.1,3.4,3.6,3.5,3.7,3.9,3.8,4.0,4.2,4.1,4.4,4.6,4.5,4.82];
+const pipeline = [2.5,2.7,2.8,3.0,3.2,3.1,3.4,3.6,3.5,3.8,4.0,4.1,4.3,4.5,4.6,4.7,5.0,4.9,5.1,5.3,5.4,5.6,5.8,5.7,6.0];
+const target   = revenue.map(() => null);
+target[0] = 2.0; target[24] = 5.2;
+
+const ctx = document.getElementById('mainChart').getContext('2d');
+
+const goldGrad = ctx.createLinearGradient(0, 0, 0, 240);
+goldGrad.addColorStop(0, 'rgba(212,169,74,0.25)');
+goldGrad.addColorStop(1, 'rgba(212,169,74,0.0)');
+
+const violetGrad = ctx.createLinearGradient(0, 0, 0, 240);
+violetGrad.addColorStop(0, 'rgba(155,125,234,0.2)');
+violetGrad.addColorStop(1, 'rgba(155,125,234,0.0)');
+
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [
+      {
+        label: 'Revenue',
+        data: revenue,
+        borderColor: '#d4a94a',
+        backgroundColor: goldGrad,
+        borderWidth: 2.5,
+        pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: '#d4a94a',
+        tension: 0.4,
+        fill: true,
+      },
+      {
+        label: 'Pipeline',
+        data: pipeline,
+        borderColor: '#9b7dea',
+        backgroundColor: violetGrad,
+        borderWidth: 1.5,
+        borderDash: [4, 4],
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        tension: 0.4,
+        fill: true,
+      },
+      {
+        label: 'Target',
+        data: target,
+        borderColor: 'rgba(62,207,176,0.5)',
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderDash: [2, 6],
+        pointRadius: 4,
+        pointBackgroundColor: '#3ecfb0',
+        tension: 0,
+        spanGaps: true,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#18181f',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
+        padding: 12,
+        callbacks: {
+          label: ctx => ` ${ctx.dataset.label}: $${ctx.parsed.y}M`
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(255,255,255,0.04)', drawTicks: false },
+        border: { display: false },
+        ticks: { maxRotation: 0, padding: 8 }
+      },
+      y: {
+        grid: { color: 'rgba(255,255,255,0.04)', drawTicks: false },
+        border: { display: false },
+        ticks: {
+          padding: 12,
+          callback: v => `$${v}M`
+        }
+      }
+    }
+  }
+});
+
+// ──────────────────────────────────────────────
+// DONUT
+// ──────────────────────────────────────────────
+new Chart(document.getElementById('donutChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Enterprise', 'Mid-Market', 'SMB'],
+    datasets: [{
+      data: [48, 31, 21],
+      backgroundColor: ['#d4a94a', '#3ecfb0', '#9b7dea'],
+      borderWidth: 0,
+      hoverOffset: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,
+    cutout: '72%',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#18181f',
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
+        padding: 10,
+        callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}%` }
+      }
+    }
+  }
+});
+
+// ──────────────────────────────────────────────
+// SPARKLINES
+// ──────────────────────────────────────────────
+function sparkline(id, data, color) {
+  const c = document.getElementById(id);
+  if (!c) return;
+  new Chart(c, {
+    type: 'line',
+    data: {
+      labels: data.map((_,i) => i),
+      datasets: [{ data, borderColor: color, borderWidth: 1.5, pointRadius: 0, tension: 0.4, fill: false }]
+    },
+    options: {
+      responsive: false,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      scales: { x: { display: false }, y: { display: false } },
+      animation: false,
+    }
+  });
+}
+
+sparkline('spark1', [1.8,2.1,1.9,2.4,2.3,2.7,2.9,3.1,3.4,3.8,4.2,4.82], '#d4a94a');
+sparkline('spark2', [1800,2000,1950,2100,2200,2400,2350,2500,2650,2700,2800,2847], '#3ecfb0');
+sparkline('spark3', [2.1,2.0,2.3,2.4,2.2,2.5,2.7,2.6,2.9,3.0,3.1,3.2], '#e05a7a');
+sparkline('spark4', [12,13,12.5,13.5,14,14.5,15,14.8,15.5,16,16.5,16.9], '#9b7dea');
+
+// ──────────────────────────────────────────────
+// TICKER
+// ──────────────────────────────────────────────
+const ticks = [
+  { name: 'Enterprise ARR', val: '$2.31M', delta: '+8.2%', up: true },
+  { name: 'MRR', val: '$402K', delta: '+14.1%', up: true },
+  { name: 'NPS Score', val: '72', delta: '+4pts', up: true },
+  { name: 'Support Tickets', val: '318', delta: '-12%', up: false },
+  { name: 'Avg Response', val: '4.2h', delta: '-0.8h', up: true },
+  { name: 'Trial Conv.', val: '26.4%', delta: '+3.1pp', up: true },
+  { name: 'CAC', val: '$1,840', delta: '+5.2%', up: false },
+  { name: 'LTV:CAC', val: '9.2x', delta: '+0.7x', up: true },
+];
+
+const doubled = [...ticks, ...ticks];
+const wrap = document.getElementById('tickerItems');
+doubled.forEach(t => {
+  const el = document.createElement('div');
+  el.className = 'ticker-item';
+  el.innerHTML = `
+    <span class="ticker-name">${t.name}</span>
+    <span class="ticker-val">${t.val}</span>
+    <span class="${t.up ? 'ticker-up' : 'ticker-dn'}">${t.delta}</span>
+  `;
+  wrap.appendChild(el);
+});
+</script>
+</body>
+</html>

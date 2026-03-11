@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Health · Dashboard Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --qblue: #003f7d;
+    --qblue-mid: #1a5fa8;
+    --qblue-light: #3b82cc;
+    --qteal: #00b5a0;
+    --qgreen: #27ae6e;
+    --qred: #e03b5d;
+    --qamber: #e8972a;
+    --bg: #f5f7f9;
+    --white: #ffffff;
+    --text: #0f1f35;
+    --text-muted: #5a708a;
+    --text-dim: #9aaabb;
+    --border: rgba(30,60,100,0.09);
+    --shadow: 0 2px 16px rgba(0,40,100,0.07), 0 1px 4px rgba(0,40,100,0.05);
+    --shadow-hover: 0 12px 40px rgba(0,40,100,0.14), 0 4px 12px rgba(0,40,100,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: var(--text);
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    background: linear-gradient(160deg, #001a3a 0%, var(--qblue) 40%, var(--qblue-mid) 70%, #1a6db5 100%);
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 20%, rgba(0,181,160,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 80%, rgba(59,130,204,0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(255,255,255,0.03) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Animated grid pattern */
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 70%);
+    pointer-events: none;
+    animation: gridDrift 20s linear infinite;
+  }
+
+  @keyframes gridDrift {
+    0% { transform: translate(0,0); }
+    100% { transform: translate(60px, 60px); }
+  }
+
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 40px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 48px;
+  }
+
+  .logo-mark {
+    width: 48px; height: 48px;
+    background: var(--qteal);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    color: white;
+    box-shadow: 0 4px 20px rgba(0,181,160,0.4);
+  }
+
+  .logo-text-wrap {
+    text-align: left;
+  }
+
+  .logo-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    line-height: 1.1;
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,181,160,0.15);
+    border: 1px solid rgba(0,181,160,0.25);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--qteal);
+    font-family: 'IBM Plex Mono', monospace;
+    margin-bottom: 28px;
+    letter-spacing: 0.5px;
+  }
+
+  .hero-badge-dot {
+    width: 6px; height: 6px;
+    background: var(--qteal);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 800;
+    color: white;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    margin-bottom: 20px;
+    max-width: 700px;
+  }
+
+  .hero h1 span {
+    background: linear-gradient(135deg, var(--qteal), #4de8d0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-desc {
+    font-size: 16px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.6;
+    max-width: 520px;
+    margin-bottom: 40px;
+  }
+
+  /* Stats strip */
+  .hero-stats {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 8px;
+  }
+
+  .hero-stat {
+    text-align: center;
+  }
+
+  .hero-stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+    letter-spacing: -1px;
+  }
+
+  .hero-stat-label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-top: 4px;
+  }
+
+  /* Floating particles */
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.15;
+  }
+
+  .p1 { width: 300px; height: 300px; background: var(--qteal); top: -100px; right: -100px; filter: blur(80px); animation: float1 8s ease-in-out infinite; }
+  .p2 { width: 200px; height: 200px; background: #3b82cc; bottom: -60px; left: -60px; filter: blur(60px); animation: float2 10s ease-in-out infinite; }
+  .p3 { width: 150px; height: 150px; background: var(--qteal); top: 40%; left: 10%; filter: blur(60px); animation: float3 12s ease-in-out infinite; }
+
+  @keyframes float1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-30px, 20px); } }
+  @keyframes float2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(20px, -30px); } }
+  @keyframes float3 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(15px, -15px); } }
+
+  /* ─── DASHBOARD CARDS SECTION ─── */
+  .section {
+    max-width: 1200px;
+    margin: -40px auto 0;
+    padding: 0 40px 80px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--qteal);
+    margin-bottom: 8px;
+  }
+
+  .section-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .dash-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    position: relative;
+  }
+
+  .dash-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-6px);
+  }
+
+  .dash-card:hover .card-preview {
+    transform: scale(1.02);
+  }
+
+  .card-preview {
+    width: 100%;
+    height: 280px;
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.35s ease;
+  }
+
+  .card-preview-inner {
+    width: 200%;
+    height: 200%;
+    transform: scale(0.5);
+    transform-origin: top left;
+    pointer-events: none;
+    border: none;
+  }
+
+  .card-preview-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 60%, rgba(255,255,255,0.95) 100%);
+    pointer-events: none;
+  }
+
+  .card-info {
+    padding: 24px 28px 28px;
+    position: relative;
+  }
+
+  .card-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-family: 'IBM Plex Mono', monospace;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+  }
+
+  .tag-gtm {
+    background: rgba(0,63,125,0.08);
+    color: var(--qblue);
+  }
+
+  .tag-exec {
+    background: rgba(0,181,160,0.1);
+    color: #008f7e;
+  }
+
+  .card-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--qblue);
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+
+  .card-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+
+  .card-metrics {
+    display: flex;
+    gap: 20px;
+  }
+
+  .card-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .metric-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .metric-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .card-arrow {
+    position: absolute;
+    right: 28px;
+    bottom: 28px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--qblue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    transition: all 0.25s;
+    box-shadow: 0 4px 12px rgba(0,63,125,0.25);
+  }
+
+  .dash-card:hover .card-arrow {
+    background: var(--qteal);
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(0,181,160,0.35);
+  }
+
+  /* ─── FEATURE STRIP ─── */
+  .features {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .feature {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: all 0.25s;
+  }
+
+  .feature:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-3px);
+  }
+
+  .feature-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin: 0 auto 14px;
+  }
+
+  .feature-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--qblue);
+    margin-bottom: 6px;
+  }
+
+  .feature-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    background: var(--qblue);
+    padding: 32px 40px;
+    text-align: center;
+    color: rgba(255,255,255,0.4);
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .footer a {
+    color: var(--qteal);
+    text-decoration: none;
+  }
+
+  .footer-brand {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .dash-card {
+    opacity: 0;
+    animation: riseIn 0.6s ease forwards;
+  }
+
+  .dash-card:nth-child(1) { animation-delay: 0.15s; }
+  .dash-card:nth-child(2) { animation-delay: 0.25s; }
+
+  .feature {
+    opacity: 0;
+    animation: riseIn 0.5s ease forwards;
+  }
+  .feature:nth-child(1) { animation-delay: 0.3s; }
+  .feature:nth-child(2) { animation-delay: 0.37s; }
+  .feature:nth-child(3) { animation-delay: 0.44s; }
+  .feature:nth-child(4) { animation-delay: 0.51s; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 900px) {
+    .cards-grid { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr 1fr; }
+    .hero-stats { gap: 24px; }
+    .hero-inner { padding: 40px 24px 60px; }
+    .section, .features { padding-left: 24px; padding-right: 24px; }
+  }
+
+  @media (max-width: 600px) {
+    .features-grid { grid-template-columns: 1fr; }
+    .hero-stats { flex-direction: column; gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="particle p1"></div>
+  <div class="particle p2"></div>
+  <div class="particle p3"></div>
+
+  <div class="hero-inner">
+    <div class="hero-logo">
+      <div class="logo-mark">Q</div>
+      <div class="logo-text-wrap">
+        <div class="logo-name">Quantum Health</div>
+        <div class="logo-sub">Dashboard Intelligence</div>
+      </div>
+    </div>
+
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      POC 1 &middot; Live Data Integration
+    </div>
+
+    <h1>Unified <span>Revenue Intelligence</span> Platform</h1>
+    <p class="hero-desc">
+      Real-time GTM performance, client success metrics, pipeline analytics, and executive insights
+      — all unified in one platform powered by Salesforce, Aurora, and Workday Adaptive.
+    </p>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-val">$835K</div>
+        <div class="hero-stat-label">ACV Pipeline</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">103%</div>
+        <div class="hero-stat-label">W% to Budget</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">437</div>
+        <div class="hero-stat-label">Active Deals</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">79%</div>
+        <div class="hero-stat-label">BoB GRR</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD CARDS -->
+<section class="section">
+  <div class="section-header">
+    <div class="section-title">Dashboards</div>
+    <div class="section-desc">Select a dashboard view to explore live metrics and intelligence</div>
+  </div>
+
+  <div class="cards-grid">
+
+    <!-- GTM Dashboard Card -->
+    <a href="quantum-health-dashboard.html" class="dash-card">
+      <div class="card-preview" style="background: linear-gradient(135deg, #f5f7f9, #e8edf3);">
+        <iframe src="quantum-health-dashboard.html" class="card-preview-inner" loading="lazy" tabindex="-1" sandbox="allow-scripts allow-same-origin"></iframe>
+        <div class="card-preview-overlay"></div>
+      </div>
+      <div class="card-info">
+        <div class="card-tag tag-gtm">GTM &middot; Client Success</div>
+        <div class="card-name">GTM & Client Success Overview</div>
+        <div class="card-desc">
+          Pipeline stages, ACV bookings, quota attainment, retention analytics, at-risk accounts, and staffing — all sourced from Salesforce + Aurora.
+        </div>
+        <div class="card-metrics">
+          <div class="card-metric">
+            <span class="metric-val">$835K</span>
+            <span class="metric-label">Pipeline</span>
+          </div>
+          <div class="card-metric">
+            <span class="metric-val">104%</span>
+            <span class="metric-label">W% Quota</span>
+          </div>
+          <div class="card-metric">
+            <span class="metric-val">$387M</span>
+            <span class="metric-label">BoB ACV</span>
+          </div>
+        </div>
+        <div class="card-arrow">&rarr;</div>
+      </div>
+    </a>
+
+    <!-- Executive Dashboard Card -->
+    <a href="dashboard-poc.html" class="dash-card">
+      <div class="card-preview" style="background: #0a0a0f;">
+        <iframe src="dashboard-poc.html" class="card-preview-inner" loading="lazy" tabindex="-1" sandbox="allow-scripts allow-same-origin"></iframe>
+        <div class="card-preview-overlay" style="background: linear-gradient(to bottom, transparent 60%, rgba(255,255,255,0.95) 100%);"></div>
+      </div>
+      <div class="card-info">
+        <div class="card-tag tag-exec">Executive &middot; Analytics</div>
+        <div class="card-name">Executive Revenue Intelligence</div>
+        <div class="card-desc">
+          High-level revenue trends, customer acquisition, churn analysis, deal sizing, product performance, and quota attainment with real-time data feeds.
+        </div>
+        <div class="card-metrics">
+          <div class="card-metric">
+            <span class="metric-val">$4.82M</span>
+            <span class="metric-label">Revenue</span>
+          </div>
+          <div class="card-metric">
+            <span class="metric-val">2,847</span>
+            <span class="metric-label">Customers</span>
+          </div>
+          <div class="card-metric">
+            <span class="metric-val">92.7%</span>
+            <span class="metric-label">Quota</span>
+          </div>
+        </div>
+        <div class="card-arrow">&rarr;</div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="features-grid">
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(0,63,125,0.08);">
+        <span>&#9889;</span>
+      </div>
+      <div class="feature-title">Real-Time Sync</div>
+      <div class="feature-desc">Live data integration from Salesforce, Aurora, and Workday Adaptive with auto-refresh capabilities.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(0,181,160,0.1);">
+        <span>&#128202;</span>
+      </div>
+      <div class="feature-title">Pipeline Intelligence</div>
+      <div class="feature-desc">Full-funnel pipeline visibility by segment, stage, and product with rolling trend analysis.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(232,151,42,0.1);">
+        <span>&#128737;</span>
+      </div>
+      <div class="feature-title">Risk Detection</div>
+      <div class="feature-desc">Proactive at-risk account monitoring with health scores, NPS tracking, and term probability.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(39,174,110,0.1);">
+        <span>&#128101;</span>
+      </div>
+      <div class="feature-title">Team Analytics</div>
+      <div class="feature-desc">Rep performance, staffing utilization, quota attainment, and backfill demand at a glance.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-brand">Quantum Health &middot; Dashboard Intelligence Platform</div>
+  <div>POC 1 &middot; Built by <a href="#">AI Symmetric Solutions</a> &middot; &copy; 2026</div>
+</footer>
+
+</body>
+</html>

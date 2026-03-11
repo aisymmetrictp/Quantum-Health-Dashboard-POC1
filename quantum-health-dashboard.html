@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Health · Revenue Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #f5f7f9;
+  --white: #ffffff;
+  --surface: #ffffff;
+  --surface2: #f0f4f8;
+  --surface3: #e8edf3;
+  --border: rgba(30,60,100,0.09);
+  --border-mid: rgba(30,60,100,0.14);
+
+  /* Quantum Health brand colors */
+  --qblue: #003f7d;
+  --qblue-mid: #1a5fa8;
+  --qblue-light: #3b82cc;
+  --qblue-pale: rgba(0,63,125,0.07);
+  --qteal: #00b5a0;
+  --qteal-dim: rgba(0,181,160,0.1);
+  --qgreen: #27ae6e;
+  --qgreen-dim: rgba(39,174,110,0.1);
+  --qred: #e03b5d;
+  --qred-dim: rgba(224,59,93,0.1);
+  --qamber: #e8972a;
+  --qamber-dim: rgba(232,151,42,0.1);
+
+  --text: #0f1f35;
+  --text-muted: #5a708a;
+  --text-dim: #9aaabb;
+
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 2px 16px rgba(0,40,100,0.07), 0 1px 4px rgba(0,40,100,0.05);
+  --shadow-hover: 0 8px 32px rgba(0,40,100,0.12), 0 2px 8px rgba(0,40,100,0.07);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── SIDEBAR ─── */
+.sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 220px;
+  background: var(--qblue);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.sidebar::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; right: -80px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(0,181,160,0.15), transparent 70%);
+  pointer-events: none;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.logo-type {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-mark {
+  width: 36px; height: 36px;
+  background: var(--qteal);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  line-height: 1.2;
+}
+
+.logo-sub {
+  font-size: 9px;
+  color: rgba(255,255,255,0.45);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-family: 'IBM Plex Mono', monospace;
+  margin-top: 1px;
+}
+
+.sidebar-section-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.3);
+  font-family: 'IBM Plex Mono', monospace;
+  padding: 20px 20px 8px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 20px;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.15s;
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  font-weight: 400;
+  position: relative;
+}
+
+.nav-item:hover { color: white; background: rgba(255,255,255,0.06); }
+
+.nav-item.active {
+  color: white;
+  background: rgba(255,255,255,0.1);
+  font-weight: 500;
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 4px; bottom: 4px;
+  width: 3px;
+  background: var(--qteal);
+  border-radius: 0 3px 3px 0;
+}
+
+.nav-icon { font-size: 15px; width: 20px; text-align: center; }
+
+.sidebar-spacer { flex: 1; }
+
+.sidebar-user {
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--qteal), var(--qblue-light));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+
+.user-name { font-size: 12px; color: white; font-weight: 500; }
+.user-role { font-size: 10px; color: rgba(255,255,255,0.4); }
+
+/* ─── MAIN ─── */
+.main { margin-left: 220px; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* ─── HEADER ─── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.header-left h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--qblue);
+  letter-spacing: -0.3px;
+}
+
+.header-left p {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: 'IBM Plex Mono', monospace;
+  margin-top: 2px;
+  letter-spacing: 0.3px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tab-bar {
+  display: flex;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.tab-btn {
+  padding: 5px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+.tab-btn.active {
+  background: var(--white);
+  color: var(--qblue);
+  box-shadow: 0 1px 6px rgba(0,40,100,0.1);
+  font-weight: 600;
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--qgreen-dim);
+  border: 1px solid rgba(39,174,110,0.2);
+  border-radius: 100px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--qgreen);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.live-dot {
+  width: 6px; height: 6px;
+  background: var(--qgreen);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.btn-primary {
+  background: var(--qblue);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover { background: var(--qblue-mid); transform: translateY(-1px); }
+
+/* ─── CONTENT ─── */
+.content { padding: 28px 32px; display: flex; flex-direction: column; gap: 24px; }
+
+/* ─── SECTION LABEL ─── */
+.section-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  margin-bottom: -16px;
+}
+
+/* ─── KPI STRIP ─── */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+
+.kpi-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  animation: riseIn 0.5s ease forwards;
+}
+
+.kpi-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+
+.kpi-card:nth-child(1) { animation-delay: 0.05s; }
+.kpi-card:nth-child(2) { animation-delay: 0.1s; }
+.kpi-card:nth-child(3) { animation-delay: 0.15s; }
+.kpi-card:nth-child(4) { animation-delay: 0.2s; }
+.kpi-card:nth-child(5) { animation-delay: 0.25s; }
+
+.kpi-accent {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.kpi-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.kpi-icon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+
+.kpi-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.kpi-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.delta-up { background: var(--qgreen-dim); color: var(--qgreen); }
+.delta-down { background: var(--qred-dim); color: var(--qred); }
+.delta-flat { background: var(--qamber-dim); color: var(--qamber); }
+
+.kpi-sub { font-size: 10px; color: var(--text-dim); }
+
+/* ─── GRID ─── */
+.grid-2-1 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ─── CARD ─── */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  animation: riseIn 0.5s ease forwards;
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--qblue);
+  letter-spacing: -0.2px;
+}
+
+.card-subtitle {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  margin-top: 3px;
+  letter-spacing: 0.5px;
+}
+
+.card-badge {
+  font-size: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  padding: 3px 9px;
+  border-radius: 100px;
+  background: var(--qblue-pale);
+  color: var(--qblue-mid);
+  font-weight: 500;
+}
+
+.chart-wrap { position: relative; height: 220px; }
+.chart-wrap-sm { position: relative; height: 180px; }
+
+/* ─── CHART LEGEND ─── */
+.legend {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.legend-swatch {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+}
+
+/* ─── PIPELINE STAGES TABLE ─── */
+.pipeline-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pipeline-table th {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-dim);
+  font-weight: 600;
+  padding: 0 0 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+  white-space: nowrap;
+}
+
+.pipeline-table th:not(:first-child) { text-align: right; }
+
+.pipeline-table td {
+  padding: 11px 0;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(0,40,100,0.04);
+  vertical-align: middle;
+}
+
+.pipeline-table td:not(:first-child) {
+  text-align: right;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+}
+
+.pipeline-table tr:last-child td { border-bottom: none; }
+.pipeline-table tr:hover td { background: var(--surface2); }
+
+.seg-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.seg-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.seg-sub {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-weight: 400;
+  display: block;
+}
+
+/* ─── PROGRESS BAR ─── */
+.prog-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.prog-bar {
+  width: 54px;
+  height: 4px;
+  background: var(--surface3);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.prog-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+}
+
+/* ─── STATUS PILL ─── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 100px;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.pill-green { background: var(--qgreen-dim); color: var(--qgreen); }
+.pill-red { background: var(--qred-dim); color: var(--qred); }
+.pill-amber { background: var(--qamber-dim); color: var(--qamber); }
+.pill-blue { background: var(--qblue-pale); color: var(--qblue-mid); }
+
+/* ─── SALES REP TABLE ─── */
+.rep-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rep-table th {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  font-weight: 600;
+  padding: 0 0 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.rep-table th:not(:first-child) { text-align: center; }
+
+.rep-table td {
+  padding: 9px 0;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(0,40,100,0.04);
+}
+
+.rep-table td:not(:first-child) {
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+}
+
+.rep-table tr:last-child td { border-bottom: none; }
+.rep-table tr:hover td { background: var(--surface2); }
+
+.rep-name { font-weight: 500; font-size: 12px; }
+.rep-seg {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ─── QUOTA RING ─── */
+.quota-ring-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.quota-ring-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 0;
+}
+
+.ring-center {
+  text-align: center;
+}
+
+.ring-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--qblue);
+  letter-spacing: -1px;
+}
+
+.ring-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.product-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+
+.prod-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.prod-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.prod-name { font-weight: 500; color: var(--text); }
+.prod-val { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text-muted); }
+
+.prod-bar-bg {
+  height: 6px;
+  background: var(--surface3);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.prod-bar-fill { height: 100%; border-radius: 100px; }
+
+/* ─── CLIENT RETENTION SECTION ─── */
+.retention-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ret-tile {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  text-align: center;
+}
+
+.ret-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.ret-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* ─── PIPELINE ADDITIONS CHART ─── */
+.additions-row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.rolling-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* ─── WEEK SELECTOR ─── */
+.week-chip {
+  background: var(--qblue-pale);
+  border: 1px solid rgba(0,63,125,0.15);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--qblue-mid);
+  font-weight: 500;
+}
+
+/* ─── STAFFING TABLE ─── */
+.staff-table { width: 100%; border-collapse: collapse; }
+
+.staff-table th {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  font-weight: 600;
+  padding: 0 0 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.staff-table th:not(:first-child) { text-align: center; }
+
+.staff-table td {
+  padding: 9px 0;
+  font-size: 12px;
+  border-bottom: 1px solid rgba(0,40,100,0.04);
+}
+
+.staff-table td:not(:first-child) {
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+}
+
+.staff-table tr:last-child td { border-bottom: none; }
+.staff-100 { color: var(--qgreen); font-weight: 600; }
+.staff-part { color: var(--qamber); font-weight: 600; }
+
+/* ─── FOOTER TICKER ─── */
+.ticker {
+  border-top: 1px solid var(--border);
+  background: var(--white);
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  overflow: hidden;
+  position: sticky;
+  bottom: 0;
+}
+
+.ticker-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ticker-scroll {
+  display: flex;
+  gap: 28px;
+  animation: scroll 24s linear infinite;
+  white-space: nowrap;
+}
+
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.t-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.t-name { color: var(--text); font-weight: 500; }
+.t-up { color: var(--qgreen); }
+.t-dn { color: var(--qred); }
+
+/* ─── ANIMATIONS ─── */
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.15s; }
+.card:nth-child(3) { animation-delay: 0.2s; }
+.card:nth-child(4) { animation-delay: 0.25s; }
+
+/* ─── DIVIDER ─── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+/* ─── ALERT BANNER ─── */
+.alert-banner {
+  background: linear-gradient(135deg, var(--qblue), var(--qblue-mid));
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: white;
+}
+
+.alert-content { display: flex; align-items: center; gap: 12px; }
+.alert-icon { font-size: 20px; }
+.alert-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; }
+.alert-body { font-size: 12px; opacity: 0.75; margin-top: 1px; }
+
+.alert-stats { display: flex; gap: 28px; }
+.alert-stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+}
+.alert-stat-label { font-size: 9px; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; text-align: center; margin-top: 1px; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-type">
+      <div class="logo-mark">Q</div>
+      <div>
+        <div class="logo-text">Quantum Health</div>
+        <div class="logo-sub">Revenue Intelligence</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-section-label">Go-To-Market</div>
+  <div class="nav-item active"><span class="nav-icon">📊</span> GTM Dashboard</div>
+  <div class="nav-item"><span class="nav-icon">🔁</span> Pipeline Stages</div>
+  <div class="nav-item"><span class="nav-icon">📈</span> Pipeline Additions</div>
+  <div class="nav-item"><span class="nav-icon">🎯</span> Rep Performance</div>
+  <div class="nav-item"><span class="nav-icon">🔗</span> Broker & CRM</div>
+
+  <div class="sidebar-section-label">Client Success</div>
+  <div class="nav-item"><span class="nav-icon">🏥</span> CS Dashboard</div>
+  <div class="nav-item"><span class="nav-icon">📋</span> Renewal Tracker</div>
+  <div class="nav-item"><span class="nav-icon">⚠️</span> At-Risk Clients</div>
+  <div class="nav-item"><span class="nav-icon">📝</span> CSAT Scores</div>
+
+  <div class="sidebar-section-label">Operations</div>
+  <div class="nav-item"><span class="nav-icon">👥</span> Staffing & Backfill</div>
+  <div class="nav-item"><span class="nav-icon">📡</span> Salesforce Sync</div>
+
+  <div class="sidebar-spacer"></div>
+  <a href="index.html" class="nav-item" style="text-decoration:none;margin:0 8px;border-radius:8px;background:rgba(0,181,160,0.15);color:var(--qteal);justify-content:center;font-weight:600;font-size:11px;gap:6px;padding:10px 12px;margin-bottom:8px;">
+    <span style="font-size:14px;">&larr;</span> Home
+  </a>
+  <div class="sidebar-user">
+    <div class="user-avatar">DC</div>
+    <div>
+      <div class="user-name">Dylan Carollo</div>
+      <div class="user-role">Transformation Lead</div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <h1>GTM &amp; Client Success Overview</h1>
+      <p>WEEK ENDING 2/27/2026 · SF + AURORA + WORKDAY ADAPTIVE · AUTO-REFRESH</p>
+    </div>
+    <div class="header-right">
+      <div class="tab-bar">
+        <button class="tab-btn active">GTM</button>
+        <button class="tab-btn">Client Success</button>
+        <button class="tab-btn">Staffing</button>
+      </div>
+      <div class="live-badge">
+        <div class="live-dot"></div>
+        Live · Salesforce
+      </div>
+      <button class="btn-primary">↑ Export</button>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- BANNER -->
+    <div class="alert-banner" style="animation: riseIn 0.4s ease 0.05s both;">
+      <div class="alert-content">
+        <div class="alert-icon">🎯</div>
+        <div>
+          <div class="alert-title">Q1 2026 — Final Push · 21 Days Remaining</div>
+          <div class="alert-body">National segment tracking 390% W% to Pipeline · Signature product leading YTD at 172% W% to Quota</div>
+        </div>
+      </div>
+      <div class="alert-stats">
+        <div>
+          <div class="alert-stat-val">$835</div>
+          <div class="alert-stat-label">Total Pipeline ($K)</div>
+        </div>
+        <div>
+          <div class="alert-stat-val">103%</div>
+          <div class="alert-stat-label">W% to Budget</div>
+        </div>
+        <div>
+          <div class="alert-stat-val">$490</div>
+          <div class="alert-stat-label">National ACV ($K)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background: linear-gradient(90deg, var(--qblue), var(--qblue-light))"></div>
+        <div class="kpi-header">
+          <span class="kpi-label">ACV Pipeline</span>
+          <div class="kpi-icon" style="background:var(--qblue-pale)">💼</div>
+        </div>
+        <div class="kpi-value" style="color:var(--qblue)">$835K</div>
+        <div class="kpi-meta">
+          <span class="delta delta-up">▲ +$10K L4W</span>
+          <span class="kpi-sub">vs prior period</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background: linear-gradient(90deg, var(--qteal), #00d4b8)"></div>
+        <div class="kpi-header">
+          <span class="kpi-label">Weighted Pipeline</span>
+          <div class="kpi-icon" style="background:var(--qteal-dim)">⚖️</div>
+        </div>
+        <div class="kpi-value" style="color:var(--qteal)">$99</div>
+        <div class="kpi-meta">
+          <span class="delta delta-up">103% to Budget</span>
+          <span class="kpi-sub">WACV ($K)</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background: linear-gradient(90deg, var(--qgreen), #4cd98a)"></div>
+        <div class="kpi-header">
+          <span class="kpi-label">Pipeline Count</span>
+          <div class="kpi-icon" style="background:var(--qgreen-dim)">📦</div>
+        </div>
+        <div class="kpi-value" style="color:var(--qgreen)">437</div>
+        <div class="kpi-meta">
+          <span class="delta delta-up">▲ +7 vs prior</span>
+          <span class="kpi-sub">active deals</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background: linear-gradient(90deg, var(--qamber), #f5b942)"></div>
+        <div class="kpi-header">
+          <span class="kpi-label">Pipeline Adds L4W</span>
+          <div class="kpi-icon" style="background:var(--qamber-dim)">➕</div>
+        </div>
+        <div class="kpi-value" style="color:var(--qamber)">$24.1K</div>
+        <div class="kpi-meta">
+          <span class="delta delta-up">▲ National led</span>
+          <span class="kpi-sub">4-week avg adds</span>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-accent" style="background: linear-gradient(90deg, var(--qred), #f06080)"></div>
+        <div class="kpi-header">
+          <span class="kpi-label">Blended Avg ACV</span>
+          <div class="kpi-icon" style="background:var(--qred-dim)">📏</div>
+        </div>
+        <div class="kpi-value" style="color:var(--qred)">$2.0K</div>
+        <div class="kpi-meta">
+          <span class="delta delta-down">▼ –$4.1K chg</span>
+          <span class="kpi-sub">Disc · SQ blended</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW: Pipeline ACV Trend + Product Mix -->
+    <div class="grid-2-1">
+      <!-- ACV Trend Chart -->
+      <div class="card" style="animation-delay:0.15s">
+        <div class="card-header">
+          <div>
+            <div class="card-title">ACV Bookings vs Quota — 13-Week Rolling</div>
+            <div class="card-subtitle">SIGNATURE · FLEX · EMBOLD+ · BY SEGMENT · ($000s)</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span class="week-chip">WE 2/27/26</span>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-swatch" style="background:var(--qblue)"></div>Signature</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:var(--qteal)"></div>Flex</div>
+              <div class="legend-item"><div class="legend-swatch" style="background:var(--qamber)"></div>Embold+</div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="avcTrendChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Product Quota Attainment -->
+      <div class="card" style="animation-delay:0.2s">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Quota Attainment</div>
+            <div class="card-subtitle">BY PRODUCT · CY26 YTD</div>
+          </div>
+        </div>
+        <div class="quota-ring-section">
+          <div class="quota-ring-wrap">
+            <canvas id="quotaRing" width="140" height="140"></canvas>
+            <div class="ring-center">
+              <div class="ring-val">104%</div>
+              <div class="ring-label">W% to Quota</div>
+            </div>
+          </div>
+          <div class="product-breakdown">
+            <div class="prod-row">
+              <div class="prod-header">
+                <span class="prod-name">Signature</span>
+                <span class="prod-val">172%</span>
+              </div>
+              <div class="prod-bar-bg"><div class="prod-bar-fill" style="width:100%;background:var(--qblue)"></div></div>
+            </div>
+            <div class="prod-row">
+              <div class="prod-header">
+                <span class="prod-name">Flex</span>
+                <span class="prod-val">8%</span>
+              </div>
+              <div class="prod-bar-bg"><div class="prod-bar-fill" style="width:8%;background:var(--qteal)"></div></div>
+            </div>
+            <div class="prod-row">
+              <div class="prod-header">
+                <span class="prod-name">Embold+</span>
+                <span class="prod-val">83%</span>
+              </div>
+              <div class="prod-bar-bg"><div class="prod-bar-fill" style="width:83%;background:var(--qamber)"></div></div>
+            </div>
+            <div class="divider" style="margin:8px 0;"></div>
+            <div class="prod-row">
+              <div class="prod-header">
+                <span class="prod-name" style="color:var(--text-muted);font-size:11px;">CY26 Budget</span>
+                <span class="prod-val">$96K</span>
+              </div>
+              <div class="prod-row">
+              <div class="prod-header">
+                <span class="prod-name" style="color:var(--text-muted);font-size:11px;">CY26 Quota</span>
+                <span class="prod-val">$62K</span>
+              </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROW: Pipeline Stages + Pipeline Additions Chart -->
+    <div class="grid-2">
+      <!-- Pipeline Stages -->
+      <div class="card" style="animation-delay:0.2s">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Pipeline Stages</div>
+            <div class="card-subtitle">DISC · SQ · SOL/FIT · RFP · EVAL · F/NEG · V/COM · CW · ($000s)</div>
+          </div>
+          <span class="card-badge">Total: $835K</span>
+        </div>
+        <table class="pipeline-table">
+          <thead>
+            <tr>
+              <th>Segment</th>
+              <th>Disc</th>
+              <th>SQ</th>
+              <th>Sol/Fit</th>
+              <th>RFP</th>
+              <th>Eval</th>
+              <th>CW</th>
+              <th>Total</th>
+              <th>Chg</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="seg-label"><span class="seg-dot" style="background:var(--qblue)"></span>Reseller<span class="seg-sub"></span></div></td>
+              <td>$0</td><td>$0</td><td>$0</td><td>$0</td><td>$0</td><td>$0</td>
+              <td><strong>$0</strong></td>
+              <td><span class="pill pill-amber">—</span></td>
+            </tr>
+            <tr>
+              <td><div class="seg-label"><span class="seg-dot" style="background:var(--qteal)"></span>Mid-Market</div></td>
+              <td>$0</td><td>$7</td><td>$7</td><td>$0</td><td>$10</td><td>$0</td>
+              <td><strong>$22</strong></td>
+              <td><span class="pill pill-green">+$2K</span></td>
+            </tr>
+            <tr>
+              <td><div class="seg-label"><span class="seg-dot" style="background:var(--qamber)"></span>Regional</div></td>
+              <td>$138</td><td>$121</td><td>$38</td><td>$22</td><td>$3</td><td>$0</td>
+              <td><strong>$322</strong></td>
+              <td><span class="pill pill-red">–$7K</span></td>
+            </tr>
+            <tr>
+              <td><div class="seg-label"><span class="seg-dot" style="background:var(--qred)"></span>National</div></td>
+              <td>$184</td><td>$250</td><td>$55</td><td>$100</td><td>$22</td><td>$4</td>
+              <td><strong>$490</strong></td>
+              <td><span class="pill pill-red">–$52K</span></td>
+            </tr>
+            <tr style="background:var(--surface2);">
+              <td><div class="seg-label" style="font-weight:700">Total</div></td>
+              <td style="font-weight:700">$328</td>
+              <td style="font-weight:700">$378</td>
+              <td style="font-weight:700">$100</td>
+              <td style="font-weight:700">$22</td>
+              <td style="font-weight:700">$34</td>
+              <td style="font-weight:700">$4</td>
+              <td style="font-weight:700;color:var(--qblue)">$835</td>
+              <td><span class="pill pill-red">–$43K</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style="margin-top:16px;">
+          <div style="font-size:10px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Pipeline Count</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+            <div style="background:var(--qblue-pale);border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--qblue)">164</div>
+              <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">Total</div>
+            </div>
+            <div style="background:var(--qblue-pale);border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--qteal)">45</div>
+              <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">Mid-Mkt</div>
+            </div>
+            <div style="background:var(--qblue-pale);border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--qamber)">107</div>
+              <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">Regional</div>
+            </div>
+            <div style="background:var(--qblue-pale);border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--qred)">12</div>
+              <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">National</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pipeline Additions Weekly Bar -->
+      <div class="card" style="animation-delay:0.25s">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Pipeline Additions — Weekly</div>
+            <div class="card-subtitle">L4W ROLLING AVG · ACV $ ADDED BY SIZE · ($000s)</div>
+          </div>
+          <span class="card-badge">L4W: $24.1K</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="additionsChart"></canvas>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;">
+          <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--qblue)">$0.05</div>
+            <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">Reseller L4W</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--qteal)">$2.1</div>
+            <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">Mid-Mkt L4W</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:var(--qred)">$21.4</div>
+            <div style="font-size:9px;color:var(--text-dim);margin-top:2px;">National L4W</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CLIENT SUCCESS SECTION ═══ -->
+    <div class="section-label" style="margin-top:4px;">— Client Success · Renewal &amp; Retention Dashboard</div>
+
+    <!-- CS KPIs -->
+    <div class="retention-grid">
+      <div class="ret-tile">
+        <div class="ret-val" style="color:var(--qblue)">$387.1</div>
+        <div class="ret-label">BoB ACV ($M)</div>
+      </div>
+      <div class="ret-tile">
+        <div class="ret-val" style="color:var(--qgreen)">79%</div>
+        <div class="ret-label">BoB GRR</div>
+      </div>
+      <div class="ret-tile">
+        <div class="ret-val" style="color:var(--qred)">$80.3</div>
+        <div class="ret-label">ACV at Risk ($M)</div>
+      </div>
+      <div class="ret-tile">
+        <div class="ret-val" style="color:var(--qamber)">19</div>
+        <div class="ret-label">Active Reps</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- GRR by Director Chart -->
+      <div class="card" style="animation-delay:0.1s">
+        <div class="card-header">
+          <div>
+            <div class="card-title">GRR by CEG Director</div>
+            <div class="card-subtitle">TERM ACV · RENEW ACV · GRR % · ($Ms)</div>
+          </div>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-swatch" style="background:var(--qgreen)"></div>Renew ACV</div>
+            <div class="legend-item"><div class="legend-swatch" style="background:var(--qred)"></div>Term ACV</div>
+          </div>
+        </div>
+        <div class="chart-wrap-sm">
+          <canvas id="grrChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Renewal by Segment Chart -->
+      <div class="card" style="animation-delay:0.15s">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Renewal by Segment</div>
+            <div class="card-subtitle">TERM ACV · RENEW ACV · GRR % · ($Ms)</div>
+          </div>
+        </div>
+        <div class="chart-wrap-sm">
+          <canvas id="renewalSegChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top 20 At-Risk Accounts -->
+    <div class="card" style="animation-delay:0.2s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Top At-Risk Accounts — Sorted by ACV (Weighted Term %)</div>
+          <div class="card-subtitle">SF + AURORA + WORKDAY ADAPTIVE · REPORT DATE 3/2/2026</div>
+        </div>
+        <span class="card-badge">90% Term Probability Filter</span>
+      </div>
+      <table class="rep-table">
+        <thead>
+          <tr>
+            <th>Account</th>
+            <th>CSE</th>
+            <th>CEG Director</th>
+            <th>Segment</th>
+            <th>Renewal Yr</th>
+            <th>Total ACV</th>
+            <th>Renew ACV</th>
+            <th>Health</th>
+            <th>NPS</th>
+            <th>% Term</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><div class="rep-name">Petco</div></td>
+            <td><span style="font-size:11px;font-family:'IBM Plex Mono',monospace">K. DePalo</span></td>
+            <td><span style="font-size:11px;color:var(--text-muted)">M. Sabol</span></td>
+            <td><span class="pill pill-blue">Upper-Mid</span></td>
+            <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">2027</td>
+            <td>$1.7M</td><td>$1.5M</td>
+            <td><span style="color:var(--qred);font-family:'IBM Plex Mono',monospace;font-size:11px;">–11</span></td>
+            <td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">10</span></td>
+            <td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--qred);font-weight:600;">90%</span></td>
+            <td><span class="pill pill-red">At Risk</span></td>
+          </tr>
+          <tr>
+            <td><div class="rep-name">Seaboard Corp</div></td>
+            <td><span style="font-size:11px;font-family:'IBM Plex Mono',monospace">F. Stricker</span></td>
+            <td><span style="font-size:11px;color:var(--text-muted)">M. Sabol</span></td>
+            <td><span class="pill pill-blue">Upper-Mid</span></td>
+            <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">2026</td>
+            <td>$1.7M</td><td>$1.5M</td>
+            <td><span style="color:var(--qred);font-family:'IBM Plex Mono',monospace;font-size:11px;">–43</span></td>
+            <td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">0</span></td>
+            <td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--qred);font-weight:600;">90%</span></td>
+            <td><span class="pill pill-red">At Risk</span></td>
+          </tr>
+          <tr>
+            <td><div class="rep-name">Prospect Medical Holdings</div></td>
+            <td><span style="font-size:11px;font-family:'IBM Plex Mono',monospace">S. Bennett</span></td>
+            <td><span style="font-size:11px;color:var(--text-muted)">M. Freels</span></td>
+            <td><span class="pill pill-amber">Lower-Mid</span></td>
+            <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">2026</td>
+            <td>$1.3M</td><td>$1.1M</td>
+            <td><span style="color:var(--qgreen);font-family:'IBM Plex Mono',monospace;font-size:11px;">10.0</span></td>
+            <td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">2</span></td>
+            <td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--qred);font-weight:600;">90%</span></td>
+            <td><span class="pill pill-red">At Risk</span></td>
+          </tr>
+          <tr>
+            <td><div class="rep-name">Sinclair</div></td>
+            <td><span style="font-size:11px;font-family:'IBM Plex Mono',monospace">K. DePalo</span></td>
+            <td><span style="font-size:11px;color:var(--text-muted)">K. Freels</span></td>
+            <td><span class="pill pill-blue">Upper-Mid</span></td>
+            <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">2026</td>
+            <td>$1.2M</td><td>$1.1M</td>
+            <td><span style="color:var(--qgreen);font-family:'IBM Plex Mono',monospace;font-size:11px;">9.0</span></td>
+            <td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">43</span></td>
+            <td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--qred);font-weight:600;">90%</span></td>
+            <td><span class="pill pill-amber">Watch</span></td>
+          </tr>
+          <tr>
+            <td><div class="rep-name">Johns Hopkins University</div></td>
+            <td><span style="font-size:11px;font-family:'IBM Plex Mono',monospace">M. Parker</span></td>
+            <td><span style="font-size:11px;color:var(--text-muted)">M. Sabol</span></td>
+            <td><span class="pill pill-blue">Upper-Mid</span></td>
+            <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">2026</td>
+            <td>$4.3M</td><td>$3.9M</td>
+            <td><span style="color:var(--qamber);font-family:'IBM Plex Mono',monospace;font-size:11px;">8.5</span></td>
+            <td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">9</span></td>
+            <td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--qamber);font-weight:600;">25%</span></td>
+            <td><span class="pill pill-amber">Watch</span></td>
+          </tr>
+          <tr>
+            <td><div class="rep-name">Comerica Incorporated</div></td>
+            <td><span style="font-size:11px;font-family:'IBM Plex Mono',monospace">F. Stricker</span></td>
+            <td><span style="font-size:11px;color:var(--text-muted)">M. Sabol</span></td>
+            <td><span class="pill pill-blue">Upper-Mid</span></td>
+            <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">2026</td>
+            <td>$1.3M</td><td>$1.1M</td>
+            <td><span style="color:var(--qgreen);font-family:'IBM Plex Mono',monospace;font-size:11px;">9.0</span></td>
+            <td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">10</span></td>
+            <td><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--qamber);font-weight:600;">25%</span></td>
+            <td><span class="pill pill-green">Healthy</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Staffing -->
+    <div class="card" style="animation-delay:0.25s">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Staffing Update — Sales Engagement</div>
+          <div class="card-subtitle">PLAN · % FILLED · OPEN · ACPT · UPSKILL · BACKFILL DEMAND</div>
+        </div>
+        <span class="card-badge">44 Total Headcount</span>
+      </div>
+      <table class="staff-table">
+        <thead>
+          <tr>
+            <th>Team</th>
+            <th>Plan</th>
+            <th>% Filled</th>
+            <th>Open</th>
+            <th>Accepted</th>
+            <th>Upskill</th>
+            <th>Backfill Demand</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="font-weight:500;">Mid Market Reps</td><td>4</td><td class="staff-100">100%</td><td>0</td><td>0</td><td>0</td><td style="font-size:11px;color:var(--text-muted)">Marketing to New</td></tr>
+          <tr><td style="font-weight:500;">Regional Reps</td><td>11</td><td class="staff-100">100%</td><td>0</td><td>0</td><td>3</td><td style="font-size:11px;color:var(--text-muted)">Marketing to Cons.</td></tr>
+          <tr><td style="font-weight:500;">National Reps</td><td>4</td><td class="staff-100">100%</td><td>0</td><td>0</td><td>2</td><td style="font-size:11px;color:var(--text-muted)">Marketing to Exist.</td></tr>
+          <tr><td style="font-weight:500;">EH Overlay</td><td>3</td><td class="staff-100">100%</td><td>0</td><td>0</td><td>1</td><td style="font-size:11px;color:var(--text-muted)">Marketing to Exist.</td></tr>
+          <tr><td style="font-weight:500;">AHP &amp; Carriers</td><td>6</td><td class="staff-part">67%</td><td>2</td><td>0</td><td>0</td><td style="font-size:11px;color:var(--text-muted)">CRM to Cons/Brk</td></tr>
+          <tr><td style="font-weight:500;">Xcell</td><td>3</td><td class="staff-100">100%</td><td>0</td><td>1</td><td>0</td><td style="font-size:11px;color:var(--text-muted)">Marketing to Exist.</td></tr>
+          <tr><td style="font-weight:500;">Solution Engineers</td><td>6</td><td class="staff-part">83%</td><td>1</td><td>1</td><td>0</td><td>—</td></tr>
+          <tr><td style="font-weight:500;">BDRs (incl. Direct)</td><td>5</td><td class="staff-100">100%</td><td>0</td><td>0</td><td>1</td><td>—</td></tr>
+          <tr style="background:var(--surface2);">
+            <td style="font-weight:700;">Total Sales Engagement</td>
+            <td style="font-weight:700;">44</td>
+            <td style="font-weight:700;color:var(--qblue);">—</td>
+            <td style="font-weight:700;">2</td>
+            <td style="font-weight:700;">3</td>
+            <td style="font-weight:700;">7</td>
+            <td style="font-size:11px;color:var(--text-muted)">Total Demand/L</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div><!-- /content -->
+
+  <!-- TICKER -->
+  <div class="ticker">
+    <span class="ticker-label">Live ·</span>
+    <div class="ticker-scroll" id="tickerWrap"></div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// Tab switcher
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// Chart.js defaults
+Chart.defaults.color = '#9aaabb';
+Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+Chart.defaults.font.size = 10;
+
+const tooltipStyle = {
+  backgroundColor: '#0f1f35',
+  borderColor: 'rgba(0,63,125,0.2)',
+  borderWidth: 1,
+  padding: 10,
+  cornerRadius: 8,
+};
+
+// ── ACV TREND CHART ──
+const weeks = ['12/5','12/12','12/19','12/26','1/2','1/9','1/16','1/23','1/30','2/6','2/13','2/20','2/27'];
+new Chart(document.getElementById('avcTrendChart'), {
+  type: 'bar',
+  data: {
+    labels: weeks,
+    datasets: [
+      {
+        label: 'Signature',
+        data: [15.8,16.2,15.9,18.4,17.0,16.5,17.8,18.1,16.6,18.5,19.2,20.1,21.8],
+        backgroundColor: 'rgba(0,63,125,0.75)',
+        borderRadius: 4,
+        stack: 'total',
+      },
+      {
+        label: 'Flex',
+        data: [1.2,1.5,1.1,1.3,1.0,1.4,1.2,1.8,1.1,1.5,1.3,1.6,1.0],
+        backgroundColor: 'rgba(0,181,160,0.75)',
+        borderRadius: 4,
+        stack: 'total',
+      },
+      {
+        label: 'Embold+',
+        data: [4.1,5.2,4.8,5.5,4.9,5.8,6.1,6.4,5.9,6.5,7.0,6.8,7.4],
+        backgroundColor: 'rgba(232,151,42,0.75)',
+        borderRadius: 4,
+        stack: 'total',
+      },
+      {
+        label: 'Target',
+        data: weeks.map(() => 24),
+        type: 'line',
+        borderColor: 'rgba(224,59,93,0.5)',
+        borderDash: [4,4],
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: false,
+        stack: undefined,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { display: false }, tooltip: tooltipStyle },
+    scales: {
+      x: { grid: { display: false }, border: { display: false } },
+      y: {
+        stacked: true,
+        grid: { color: 'rgba(0,40,100,0.06)', drawTicks: false },
+        border: { display: false },
+        ticks: { padding: 8, callback: v => `$${v}K` }
+      }
+    }
+  }
+});
+
+// ── QUOTA RING ──
+new Chart(document.getElementById('quotaRing'), {
+  type: 'doughnut',
+  data: {
+    datasets: [{
+      data: [104, 96],
+      backgroundColor: ['#003f7d', 'rgba(0,63,125,0.08)'],
+      borderWidth: 0,
+      hoverOffset: 0,
+    }]
+  },
+  options: {
+    responsive: false,
+    cutout: '78%',
+    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+    animation: { duration: 1200, easing: 'easeInOutQuart' },
+  }
+});
+
+// ── PIPELINE ADDITIONS ──
+const addWeeks = ['2/27','2/20','2/13','2/6','1/30','1/23','1/16','1/9'];
+new Chart(document.getElementById('additionsChart'), {
+  type: 'bar',
+  data: {
+    labels: addWeeks,
+    datasets: [
+      {
+        label: 'National',
+        data: [21.4, 42, 11, 29, 14, 7, 18, 14],
+        backgroundColor: 'rgba(0,63,125,0.8)',
+        borderRadius: 5,
+        stack: 's',
+      },
+      {
+        label: 'Regional',
+        data: [1.6, 36, 0, 18, 12, 0, 8, 5],
+        backgroundColor: 'rgba(0,181,160,0.7)',
+        borderRadius: 5,
+        stack: 's',
+      },
+      {
+        label: 'Mid-Market',
+        data: [1.0, 2, 0, 1, 1, 1, 1, 0],
+        backgroundColor: 'rgba(232,151,42,0.7)',
+        borderRadius: 5,
+        stack: 's',
+      },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'x',
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { display: false }, tooltip: tooltipStyle },
+    scales: {
+      x: { stacked: true, grid: { display: false }, border: { display: false } },
+      y: {
+        stacked: true,
+        grid: { color: 'rgba(0,40,100,0.06)', drawTicks: false },
+        border: { display: false },
+        ticks: { padding: 8, callback: v => `$${v}K` }
+      }
+    }
+  }
+});
+
+// ── GRR BY DIRECTOR ──
+const directors = ['C. Noel','D. Bowman','K. Storm','M. Sabol','M. Freels','P. Edwards'];
+new Chart(document.getElementById('grrChart'), {
+  type: 'bar',
+  data: {
+    labels: directors,
+    datasets: [
+      {
+        label: 'Renew ACV',
+        data: [84, 87, 109, 142, 11, 0],
+        backgroundColor: 'rgba(39,174,110,0.75)',
+        borderRadius: 5,
+        stack: 's',
+      },
+      {
+        label: 'Term ACV',
+        data: [4, 12, 27, 26, 7, 0],
+        backgroundColor: 'rgba(224,59,93,0.65)',
+        borderRadius: 5,
+        stack: 's',
+      },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { ...tooltipStyle, callbacks: { label: c => ` ${c.dataset.label}: $${c.parsed.y}M` } }
+    },
+    scales: {
+      x: { stacked: true, grid: { display: false }, border: { display: false } },
+      y: {
+        stacked: true,
+        grid: { color: 'rgba(0,40,100,0.06)', drawTicks: false },
+        border: { display: false },
+        ticks: { padding: 8, callback: v => `$${v}M` }
+      }
+    }
+  }
+});
+
+// ── RENEWAL BY SEGMENT ──
+const segments = ['Jumbo','Large','Upper-Mid','Lower-Mid','Small','Reseller'];
+new Chart(document.getElementById('renewalSegChart'), {
+  type: 'bar',
+  data: {
+    labels: segments,
+    datasets: [
+      {
+        label: 'Renew ACV',
+        data: [100, 43, 82, 22, 3, 11],
+        backgroundColor: 'rgba(39,174,110,0.75)',
+        borderRadius: 5,
+        stack: 's',
+      },
+      {
+        label: 'Term ACV',
+        data: [0, 8, 28, 14, 2, 1],
+        backgroundColor: 'rgba(224,59,93,0.65)',
+        borderRadius: 5,
+        stack: 's',
+      },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: tooltipStyle },
+    scales: {
+      x: { stacked: true, grid: { display: false }, border: { display: false } },
+      y: {
+        stacked: true,
+        grid: { color: 'rgba(0,40,100,0.06)', drawTicks: false },
+        border: { display: false },
+        ticks: { padding: 8, callback: v => `$${v}M` }
+      }
+    }
+  }
+});
+
+// ── TICKER ──
+const tickData = [
+  { name: 'ACV Pipeline', val: '$835K', delta: '–$43K', up: false },
+  { name: 'W% to Budget', val: '103%', delta: '+3pp', up: true },
+  { name: 'W% to Quota', val: '104%', delta: '+4pp', up: true },
+  { name: 'Nat\'l Pipeline', val: '$490K', delta: '390% W%', up: true },
+  { name: 'Signature W%Q', val: '172%', delta: '+72pp', up: true },
+  { name: 'Embold+ W%Q', val: '83%', delta: '–17pp', up: false },
+  { name: 'Flex W%Q', val: '8%', delta: '–92pp', up: false },
+  { name: 'BoB ACV', val: '$387.1M', delta: 'Q1 2026', up: true },
+  { name: 'BoB GRR', val: '79%', delta: 'Current', up: true },
+  { name: 'ACV at Risk', val: '$80.3M', delta: '⚠ Monitor', up: false },
+  { name: 'Staffing', val: '44 HC', delta: '2 Open', up: false },
+  { name: 'Pipeline Count', val: '437', delta: '+7 WoW', up: true },
+];
+
+const doubled = [...tickData, ...tickData];
+const wrap = document.getElementById('tickerWrap');
+doubled.forEach(t => {
+  const el = document.createElement('div');
+  el.className = 't-item';
+  el.innerHTML = `<span class="t-name">${t.name}</span><span class="t-val">${t.val}</span><span class="${t.up ? 't-up' : 't-dn'}">${t.delta}</span>`;
+  wrap.appendChild(el);
+});
+</script>
+</body>
+</html>
